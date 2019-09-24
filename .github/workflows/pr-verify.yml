@@ -1,0 +1,46 @@
+on:
+  pull_request:
+    paths:
+      - 'signatures/*'
+
+jobs:
+  check:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v1
+
+      - name: verify_user
+        uses: actions/github-script@0.2.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              const author = context.payload.sender.login;
+              const { data: files } = await github.request(`${context.payload.pull_request.url}/files`);
+              const signatureFiles = files.filter(it => it.status === 'added' && it.filename.split('/').includes('signatures'))
+              if (signatureFiles.length > 1) {
+                throw 'You cant sign twice!'
+              }
+              if (signatureFiles.length == 0) {
+                return null
+              }
+              const signatureFile = signatureFiles[0]
+              const parts = signatureFile.split('/')
+              if (!parts.reverse[0].startsWith(author)) {
+                throw 'You need to name your signature with your github username!';
+              }
+              return signatureFile
+            } catch (error) {
+              await github.issues.createComment({...context.issue, body: error.message});
+              await github.issues.update({...context.issue, labels: ['incorrect']});
+              throw 'build failed'
+            }
+
+      - name: verify_signature
+        run: './scripts/verify-signature.sh ${signatureFile}'
+        env:
+          signatureFile: ${{ jobs.verify-signature.outputs }}
+        if: jobs.verify-signature.outputs != null

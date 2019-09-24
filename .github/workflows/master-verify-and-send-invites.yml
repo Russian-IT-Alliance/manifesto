@@ -1,0 +1,19 @@
+on:
+  push:
+    branches: [master]
+    paths: ['signatures/*']
+
+jobs:
+  verify-and-send-invitation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: prepare
+        run: apt install -y jq gnupg curl
+      - name: checkout
+        uses: actions/checkout@v1
+        with:
+          ref: master
+      - name: verify_and_send_invitation
+        run: .scripts/on-master.sh
+        env:
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
