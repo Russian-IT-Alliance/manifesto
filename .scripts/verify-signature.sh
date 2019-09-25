@@ -4,10 +4,9 @@ emailInCommit=${1}
 signatureFile=${2}
 
 keyId=$(gpg --status-fd 1 --verify ${signatureFile} README.md 2>/dev/null | grep '\[GNUPG\:\] VALIDSIG' | cut -d' ' -f3)
+[[ "$?" == "0" && n"${keyId}" != "n" ]] || { echo "Invalid signature. Did you use detached signature?" >&2; exit 2; }
 
 [[ $(find verified-signatures -type f -name *.${keyId}.sig | wc -l) == "0" ]] || { echo "You've already signed!" >&2; exit 3; }
-
-[[ n"${keyId}" == "n" ]] && { echo "Invalid signature. Did you use detached signature?" >&2; exit 2; }
 
 gpg --recv ${keyId} 2>/dev/null || { echo "No key found on trusted resource!" >&2; exit 1; }
 
