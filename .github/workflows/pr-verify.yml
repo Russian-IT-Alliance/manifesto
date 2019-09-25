@@ -40,7 +40,7 @@ jobs:
             }
 
       - name: verify_signature
-        run: './scripts/verify-signature.sh ${signatureFile}'
+        run: './.scripts/verify-signature.sh "$(./.scripts/get-author-email.sh ${signatureFile})" ${signatureFile}'
         env:
-          signatureFile: ${{ jobs.verify-signature.outputs }}
-        if: jobs.verify-signature.outputs != null
+          signatureFile: ${{ jobs.verify_user.outputs }}
+        if: jobs.verify_user.outputs != null
