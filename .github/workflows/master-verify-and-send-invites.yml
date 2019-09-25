@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: prepare
-        run: apt install -y jq gnupg curl
+        run: sudo apt install -y jq gnupg curl
       - name: checkout
         uses: actions/checkout@v1
         with:
