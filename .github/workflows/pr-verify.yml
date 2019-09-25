@@ -20,6 +20,9 @@ jobs:
             try {
               const author = context.payload.sender.login;
               const { data: files } = await github.request(`${context.payload.pull_request.url}/files`);
+              if (files.some(it => it.status === 'added' && it.filename.split('/).includes('verified-signatures'))) {
+                throw 'You must create your signature in /signatures, not in /verified-signatures!'
+              }
               const signatureFiles = files.filter(it => it.status === 'added' && it.filename.split('/').includes('signatures'))
               if (signatureFiles.length > 1) {
                 throw 'You cant sign twice!'
