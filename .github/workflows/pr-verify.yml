@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v1
+      - name: prepare
+        run: sudo apt install -y curl jq gnupg
 
       - name: verify_user
         uses: actions/github-script@0.2.0
